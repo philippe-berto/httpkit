@@ -13,9 +13,10 @@ import (
 )
 
 const (
-	InvalidBody  = "invalid_body"
-	InvalidParam = "invalid_param"
-	InternalCode = "internal_server_error"
+	InvalidBody        = "invalid_body"
+	InvalidParam       = "invalid_param"
+	InvalidCredentials = "invalid_credentials"
+	InternalCode       = "internal_server_error"
 
 	ContentType                  = "Content-Type"
 	ApplicationJSON              = "application/json; charset=utf-8"
