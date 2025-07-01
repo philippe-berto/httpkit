@@ -18,10 +18,6 @@ import (
 )
 
 type (
-	Config struct {
-		Port int64 `env:"HTTP_PORT" envDefault:"8080"`
-	}
-
 	Handler struct {
 		server *http.Server
 		Router *chi.Mux
@@ -33,7 +29,7 @@ type (
 	}
 )
 
-func New(cfg Config, tracerEnable bool, metricsEnable bool, subdomains ...*SubDomain) *Handler {
+func New(port int, tracerEnable bool, metricsEnable bool, subdomains ...*SubDomain) *Handler {
 	router := chi.NewRouter()
 
 	router.Use(chimiddleware.StripSlashes)
@@ -61,13 +57,13 @@ func New(cfg Config, tracerEnable bool, metricsEnable bool, subdomains ...*SubDo
 	return &Handler{
 		Router: router,
 		server: &http.Server{
-			Addr:    fmt.Sprintf(":%d", cfg.Port),
+			Addr:    fmt.Sprintf(":%d", port),
 			Handler: router,
 		},
 	}
 }
 
-func NewEmpty(cfg Config, tracerEnable bool, metricsEnable bool) *Handler {
+func NewEmpty(port, tracerEnable bool, metricsEnable bool) *Handler {
 	router := chi.NewRouter()
 
 	router.Use(chimiddleware.StripSlashes)
@@ -91,7 +87,7 @@ func NewEmpty(cfg Config, tracerEnable bool, metricsEnable bool) *Handler {
 	return &Handler{
 		Router: router,
 		server: &http.Server{
-			Addr:    fmt.Sprintf(":%d", cfg.Port),
+			Addr:    fmt.Sprintf(":%d", port),
 			Handler: router,
 		},
 	}
