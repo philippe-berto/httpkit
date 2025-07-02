@@ -17,6 +17,8 @@ import (
 	"github.com/philippe-berto/httpkit/utils"
 )
 
+var corsPath string
+
 type (
 	Handler struct {
 		server *http.Server
@@ -29,7 +31,7 @@ type (
 	}
 )
 
-func New(port int, tracerEnable bool, metricsEnable bool, subdomains ...*SubDomain) *Handler {
+func New(port int, tracerEnable, metricsEnable, setCors bool, cPath string, subdomains ...*SubDomain) *Handler {
 	router := chi.NewRouter()
 
 	router.Use(chimiddleware.StripSlashes)
@@ -40,6 +42,11 @@ func New(port int, tracerEnable bool, metricsEnable bool, subdomains ...*SubDoma
 
 	if tracerEnable {
 		router.Use(tracing.TracingMiddleware)
+	}
+
+	if setCors {
+		corsPath = cPath
+		router.Use(cors)
 	}
 
 	router.Use(chimiddleware.RealIP)
@@ -128,4 +135,21 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+}
+
+func cors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", corsPath)
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Max-Age", "3600")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
